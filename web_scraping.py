@@ -28,7 +28,7 @@ if response.status_code == 200:
     # Print all the extracted links
     for url in urls:
         if any(url.endswith(x) for x in ['E0.csv']):
-            #if url.__contains__('/2'):  
+            if url.__contains__('/2'):  
                 if not url.__contains__('/21'): 
                     if not url.__contains__('/04'):  
                         list_of_urls.append('https://football-data.co.uk/'+url)
@@ -44,20 +44,26 @@ current_date = pd.to_datetime('today').normalize()
 date_range = pd.date_range(start='2010-8-1',end=current_date,name= "Date")
 df = pd.DataFrame.from_dict(date_range)
 
-result = pd.DataFrame(columns=['Date'])#,'F','G','H','I','J'])
-result['Date']=date_range
+result = pd.DataFrame.from_dict(date_range)
 print (result)
 
-
+#url = 'https://football-data.co.uk/mmz4281/2425/E0.csv'
 for url in unique_list:
-    data= pd.read_csv(url,usecols=[0,1,2,3,4])#,5,6,7,8,9,10])
-    data.Date = pd.to_datetime(data .Date, format= 'mixed')
-    pd.merge(result,data,how='left',on='Date')
-    print(result)
+    data= pd.read_csv(url,usecols=[0,1,2,3,4,5,6,7,8,9,10])
+    cols_to_use = data.columns.difference(result.columns)
+    print(cols_to_use)
+    data.Date = pd.to_datetime(data.Date, format= 'mixed')
+    data_new = pd.merge(result, data[cols_to_use], how='left', on = 'Date')
+    #data_new = pd.merge(result,data,how='left',on='Date')
+    result = data_new
 
-print(result)
+print(data)
+print(data_new)
+#print(result)
 
-result.to_csv("test_data_eng_1.csv",index=False)
+#print(result)
+
+data_new.to_csv("test_data_eng_1.csv",index=False)
 #data.Date = pd.to_datetime(data.Date, format= 'mixed')#'%Y-%m-%d', errors='coerce')
 
 
@@ -125,53 +131,4 @@ df = pd.DataFrame.from_dict(date_range)
 result = pd.merge(df,data,how='left',on='Date')
 result.to_csv("test_data_eng.csv",index=False)
 
-
-
-
-import requests
-from bs4 import BeautifulSoup
-
-URL = "https://football-data.co.uk/englandm.php"
-page = requests.get(URL)
-
-soup = BeautifulSoup(page.content, "html.parser")
-
-results = soup.find_all('td')
-print(results)
-
-
-import os
-from bs4 import BeautifulSoup
-# Python 3.x
-from urllib.request import urlopen, urlretrieve
-
-URL = 'https://football-data.co.uk/englandm.php'
-OUTPUT_DIR = ''  # path to output folder, '.' or '' uses current folder
-
-u = urlopen(URL)
-try:
-    html = u.read().decode('utf-8')
-finally:
-    u.close()
-
-soup = BeautifulSoup(html, "html.parser")
-
-
-
-results = soup.find_all (<td>)
-print(results.prettify())
-
-for link in soup.select('a[href^="http://"]'):
-    href = link.get('href')
-    if not any(href.endswith(x) for x in ['.csv','.xls','.xlsx']):
-        continue
-
-    filename = os.path.join(OUTPUT_DIR, href.rsplit('/', 1)[-1])
-
-    # We need a https:// URL for this site
-    href = href.replace('http://','https://')
-
-    print("Downloading %s to %s..." % (href, filename) )
-    urlretrieve(href, filename)
-    print("Done.")
-    '''
+'''
